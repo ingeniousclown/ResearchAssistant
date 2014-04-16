@@ -247,10 +247,19 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 						settings.showUntrackedIntricate = value
 					end)
 
-	LAM:AddCheckbox(panel, "RA_Show_Tooltips", "Show icon tooltips?", "Should tooltips show telling you what each icon is  (recommended OFF)?",
+	LAM:AddCheckbox(panel, "RA_Show_Tooltips", "Show icon tooltips?", "Should tooltips tell you what are? (recommended OFF)",
 					function() return settings.showTooltips end,	--getFunc
 					function(value)							--setFunc
 						settings.showTooltips = value
 					end)
 end
 
+function ResearchAssistantSettings:GetLanguage()
+	local lang = GetCVar("language.2")
+
+	--check for supported languages
+	if(lang == "de" or lang == "en") then return lang end
+
+	--return english if not supported
+	return "en"
+end

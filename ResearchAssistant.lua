@@ -1,7 +1,7 @@
 ------------------------------------------------------------------
 --ResearchAssistant.lua
 --Author: ingeniousclown, with modifications by tejón
---v0.6.1c
+--v0.6.3
 --[[
 Shows you when you can sell an item instead of saving it for
 research.
@@ -15,6 +15,23 @@ local DECONSTRUCTION = ZO_SmithingTopLevelDeconstructionPanelInventoryBackpack
 
 local ORNATE_TEXTURE = [[/esoui/art/tradinghouse/tradinghouse_sell_tabicon_disabled.dds]]
 local INTRICATE_TEXTURE = [[/esoui/art/progression/progression_indexicon_guilds_up.dds]]
+
+local tooltips = {
+	["en"] = {
+		ornate = "Ornate: You should sell this!",
+		intricate = "Intricate: You should deconstruct this!",
+		duplicate = "Better research candidate available!",
+		canResearch = "You don't know this trait!",
+		alreadyResearched = "You know this trait!"
+	},
+	["de"] = {
+		ornate = "Verkaufspreis: Beim Händer verkaufen!",
+		intricate = "Inspiration: Verwerte dieses Item!",
+		duplicate = "Besserer Analyse Kandidat vorhanden!",
+		canResearch = "Unbekannte Eigenschaft!",
+		alreadyResearched = "Bereits bekannt!"
+	}
+}
 
 local RASettings = nil
 local RAScanner = nil
@@ -48,7 +65,7 @@ local function SetToOrnate( indicatorControl )
 	indicatorControl:SetColor(unpack(RASettings:GetOrnateColor()))
 	indicatorControl:SetDimensions(35, 35)
 	indicatorControl:SetHidden(false)
-	HandleTooltips(indicatorControl, "Ornate: You should sell this!")
+	HandleTooltips(indicatorControl, tooltips[RASettings:GetLanguage()].ornate)
 end
 
 local function SetToIntricate( indicatorControl )
@@ -56,7 +73,7 @@ local function SetToIntricate( indicatorControl )
 	indicatorControl:SetColor(unpack(RASettings:GetIntricateColor()))
 	indicatorControl:SetDimensions(40, 40)
 	indicatorControl:SetHidden(false)
-	HandleTooltips(indicatorControl, "Intricate: You should deconstruct this!")
+	HandleTooltips(indicatorControl, tooltips[RASettings:GetLanguage()].intricate)
 end
 
 local function SetToNormal( indicatorControl )
@@ -114,14 +131,14 @@ local function AddResearchIndicatorToSlot(control)
 		local thisValue = RAScanner:CreateItemPreferenceValue(bagId, slotIndex)
 		if(RAScanner:GetTrait(magicTrait) and thisValue > RAScanner:GetTrait(magicTrait)) then
 			indicatorControl:SetColor(unpack(RASettings:GetDuplicateUnresearchedColor()))
-			HandleTooltips(indicatorControl, "You don't know this trait, but you have a better candidate for trait research than this.  Do what you want with this item.")
+			HandleTooltips(indicatorControl, tooltips[RASettings:GetLanguage()].duplicate)
 		else
 			indicatorControl:SetColor(unpack(RASettings:GetCanResearchColor()))
-			HandleTooltips(indicatorControl, "You don't know this trait!")
+			HandleTooltips(indicatorControl, tooltips[RASettings:GetLanguage()].canResearch)
 		end
 	else
 		indicatorControl:SetColor(unpack(RASettings:GetAlreadyResearchedColor()))
-		HandleTooltips(indicatorControl, "You know this trait!")
+		HandleTooltips(indicatorControl, tooltips[RASettings:GetLanguage()].alreadyResearched)
 	end
 
 	indicatorControl:SetHidden(false)

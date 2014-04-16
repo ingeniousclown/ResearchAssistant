@@ -65,7 +65,8 @@ function ResearchAssistantScanner:CheckIsItemResearchableInSkill(bagId, slotInde
 	local numLines = GetNumSmithingResearchLines(craftingSkillType)
 
 	for i=1, numLines do
-		if (CanItemBeSmithingTraitResearched(bagId, slotIndex, craftingSkillType, i, traitIndex)) then
+		if (CanItemBeSmithingTraitResearched(bagId, slotIndex, craftingSkillType, i, traitIndex)
+			and not GetSmithingResearchLineTraitTimes( craftingSkillType, i, traitIndex)) then --if not nil, then researching
 			return craftingSkillType * 1000000 + equipType * 10000 + i * 100 + traitIndex
 		end
 	end

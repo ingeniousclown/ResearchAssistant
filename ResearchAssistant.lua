@@ -1,7 +1,8 @@
 ------------------------------------------------------------------
 --ResearchAssistant.lua
---Author: ingeniousclown, with modifications by tejón
---v0.6.3
+--Author: ingeniousclown, with some minor modifications by tejón
+		--German translation by Tonyleila
+--v0.6.4
 --[[
 Shows you when you can sell an item instead of saving it for
 research.

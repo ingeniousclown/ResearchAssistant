@@ -58,6 +58,7 @@ function ResearchAssistantSettings:Initialize()
 		isWoodworking = true,
 		isClothier = true,
 
+		showResearched = true,
 		showUntrackedOrnate = true,
 		showUntrackedIntricate = true,
 
@@ -66,7 +67,7 @@ function ResearchAssistantSettings:Initialize()
 		textureName = "Modern"
 	}
 
-	settings = ZO_SavedVars:New("ResearchAssistant_Settings", 2, nil, defaults)
+	settings = ZO_SavedVars:NewAccountWide("ResearchAssistant_Settings", 2, nil, defaults)
 
     self:CreateOptionsMenu()
 end
@@ -112,6 +113,10 @@ function ResearchAssistantSettings:IsClothier()
 	return settings.isClothier
 end
 
+function ResearchAssistantSettings:ShowResearched()
+	return settings.showResearched
+end
+
 function ResearchAssistantSettings:ShowUntrackedOrnate()
 	return settings.showUntrackedOrnate
 end
@@ -145,8 +150,10 @@ function ResearchAssistantSettings:GetTextureSize()
 end
 
 function ResearchAssistantSettings:CreateOptionsMenu()
+	local str = RA_Strings[self:GetLanguage()].SETTINGS
+
 	local panel = LAM:CreateControlPanel("ResearchAssistantSettingsPanel", "Research Assistant Settings")
-	LAM:AddHeader(panel, "RA_Settings_Header", "Research Assistant")
+	LAM:AddHeader(panel, "RA_Settings_Header", "General Options")
 
 	local icon = WINDOW_MANAGER:CreateControl("RA_Icon", ZO_OptionsWindowSettingsScrollChild, CT_TEXTURE)
 	icon:SetColor(1, 1, 1, 1)
@@ -154,7 +161,7 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 			self:SetTexture(CAN_RESEARCH_TEXTURES[settings.textureName].texturePath)
 			icon:SetDimensions(CAN_RESEARCH_TEXTURES[settings.textureName].textureSize, CAN_RESEARCH_TEXTURES[settings.textureName].textureSize)
 		end)
-	local dropdown = LAM:AddDropdown(panel, "RA_Icon_Dropdown", "Research icon", "Choose which icon to display as your research assistant.", 
+	local dropdown = LAM:AddDropdown(panel, "RA_Icon_Dropdown", str.ICON_LABEL, str.ICON_TOOLTIP, 
 					TEXTURE_OPTIONS,
 					function() return settings.textureName end,	--getFunc
 					function(value)							--setFunc
@@ -167,8 +174,14 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 	icon:SetDimensions(CAN_RESEARCH_TEXTURES[settings.textureName].textureSize, CAN_RESEARCH_TEXTURES[settings.textureName].textureSize)
 	icon:SetAnchor(RIGHT, dropdown:GetNamedChild("Dropdown"), LEFT, -12, 0)
 
-	LAM:AddColorPicker(panel, "RA_Can_Research_Color_Picker", "Researchable trait color", 
-					"What color should the research assistant icon be if the trait is researchable?",
+	LAM:AddCheckbox(panel, "RA_Show_Tooltips", str.SHOW_TOOLTIPS_LABEL, str.SHOW_TOOLTIPS_TOOLTIP,
+					function() return settings.showTooltips end,	--getFunc
+					function(value)							--setFunc
+						settings.showTooltips = value
+					end)
+
+	LAM:AddHeader(panel, "RA_Colors_Header", "Color options")
+	LAM:AddColorPicker(panel, "RA_Can_Research_Color_Picker", str.RESEARCHABLE_LABEL, str.RESEARCHABLE_TOOLTIP,
 					function()
 						local r, g, b, a = HexToRGBA(settings.canResearchColor)
 						return r, g, b
@@ -177,8 +190,7 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 						settings.canResearchColor = RGBAToHex(r, g, b, 1)
 					end)
 
-	LAM:AddColorPicker(panel, "RA_Duplicate_Can_Research_Color_Picker", "Duplicate researchable trait color", 
-					"What color should the research assistant icon be if the item is researchable?",
+	LAM:AddColorPicker(panel, "RA_Duplicate_Can_Research_Color_Picker", str.DUPLICATE_LABEL, str.DUPLICATE_TOOLTIP,
 					function()
 						local r, g, b, a = HexToRGBA(settings.duplicateUnresearchedColor)
 						return r, g, b
@@ -187,8 +199,7 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 						settings.duplicateUnresearchedColor = RGBAToHex(r, g, b, 1)
 					end)
 
-	LAM:AddColorPicker(panel, "RA_Already_Researched_Color_Picker", "Already researched color", 
-					"What color should the research assistant icon be if the item is already researched?",
+	LAM:AddColorPicker(panel, "RA_Already_Researched_Color_Picker", str.RESEARCHED_LABEL, str.RESEARCHED_TOOLTIP,
 					function()
 						local r, g, b, a = HexToRGBA(settings.alreadyResearchedColor)
 						return r, g, b
@@ -197,8 +208,7 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 						settings.alreadyResearchedColor = RGBAToHex(r, g, b, 1)
 					end)
 
-	LAM:AddColorPicker(panel, "RA_Ornate_Color_Picker", "Ornate item color", 
-					"What color should the icon be for an ornate item?",
+	LAM:AddColorPicker(panel, "RA_Ornate_Color_Picker", str.ORNATE_LABEL, str.ORNATE_TOOLTIP,
 					function()
 						local r, g, b, a = HexToRGBA(settings.ornateColor)
 						return r, g, b
@@ -207,8 +217,7 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 						settings.ornateColor = RGBAToHex(r, g, b, 1)
 					end)
 
-	LAM:AddColorPicker(panel, "RA_Intricate_Color_Picker", "Intricate item color", 
-					"What color should the icon be for an intricate item?",
+	LAM:AddColorPicker(panel, "RA_Intricate_Color_Picker", str.INTRICATE_LABEL, str.INTRICATE_TOOLTIP,
 					function()
 						local r, g, b, a = HexToRGBA(settings.intricateColor)
 						return r, g, b
@@ -217,40 +226,41 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 						settings.intricateColor = RGBAToHex(r, g, b, 1)
 					end)
 
-	LAM:AddCheckbox(panel, "RA_Is_Blacksmith", "Track Blacksmithing?", "Toggle the Research Assistant for Blacksmithing.",
+	LAM:AddHeader(panel, "RA_Tracking_Header", "Tracking Options")
+	LAM:AddCheckbox(panel, "RA_Is_Blacksmith", str.BLACKSMITH_LABEL, str.BLACKSMITH_TOOLTIP,
 					function() return settings.isBlacksmith end,	--getFunc
 					function(value)							--setFunc
 						settings.isBlacksmith = value
 					end)
 
-	LAM:AddCheckbox(panel, "RA_Is_Clothier", "Track Clothier?", "Toggle the Research Assistant for Clothier.",
+	LAM:AddCheckbox(panel, "RA_Is_Clothier", str.CLOTHIER_LABEL, str.CLOTHIER_TOOLTIP,
 					function() return settings.isClothier end,	--getFunc
 					function(value)							--setFunc
 						settings.isClothier = value
 					end)
 
-	LAM:AddCheckbox(panel, "RA_Is_Woodworking", "Track Woodworking?", "Toggle the Research Assistant for Woodworking.",
+	LAM:AddCheckbox(panel, "RA_Is_Woodworking", str.WOODWORKING_LABEL, str.WOODWORKING_TOOLTIP,
 					function() return settings.isWoodworking end,	--getFunc
 					function(value)							--setFunc
 						settings.isWoodworking = value
 					end)
 
-	LAM:AddCheckbox(panel, "RA_Show_Untracked_Ornate", "Always show Ornate?", "Should Ornate be shown for untracked skills?",
+	LAM:AddCheckbox(panel, "RA_Show_Researched", str.SHOW_RESEARCHED_LABEL, str.SHOW_RESEARCHED_TOOLTIP,
+					function() return settings.showResearched end,	--getFunc
+					function(value)							--setFunc
+						settings.showResearched = value
+					end)
+
+	LAM:AddCheckbox(panel, "RA_Show_Untracked_Ornate", str.SHOW_ORNATE_LABEL, str.SHOW_ORNATE_TOOLTIP,
 					function() return settings.showUntrackedOrnate end,	--getFunc
 					function(value)							--setFunc
 						settings.showUntrackedOrnate = value
 					end)
 
-	LAM:AddCheckbox(panel, "RA_Show_Untracked_Intricate", "Always show Intricate?", "Should Intricate be shown for untracked skills?",
+	LAM:AddCheckbox(panel, "RA_Show_Untracked_Intricate", str.SHOW_INTRICATE_LABEL, str.SHOW_INTRICATE_TOOLTIP,
 					function() return settings.showUntrackedIntricate end,	--getFunc
 					function(value)							--setFunc
 						settings.showUntrackedIntricate = value
-					end)
-
-	LAM:AddCheckbox(panel, "RA_Show_Tooltips", "Show icon tooltips?", "Should tooltips tell you what are? (recommended OFF)",
-					function() return settings.showTooltips end,	--getFunc
-					function(value)							--setFunc
-						settings.showTooltips = value
 					end)
 end
 

@@ -2,7 +2,7 @@
 --ResearchAssistant.lua
 --Author: ingeniousclown, with some minor modifications by tejón
 		--German translation by Tonyleila
---v0.6.4
+--v0.6.5
 --[[
 Shows you when you can sell an item instead of saving it for
 research.
@@ -128,6 +128,7 @@ local function AddResearchIndicatorToSlot(control)
 		end
 	end
 
+	indicatorControl:SetHidden(false)
 	if(magicTrait and magicTrait >= 0) then
 		local thisValue = RAScanner:CreateItemPreferenceValue(bagId, slotIndex)
 		if(RAScanner:GetTrait(magicTrait) and thisValue > RAScanner:GetTrait(magicTrait)) then
@@ -140,9 +141,11 @@ local function AddResearchIndicatorToSlot(control)
 	else
 		indicatorControl:SetColor(unpack(RASettings:GetAlreadyResearchedColor()))
 		HandleTooltips(indicatorControl, tooltips[RASettings:GetLanguage()].alreadyResearched)
+		if(not RASettings:ShowResearched()) then
+			indicatorControl:SetHidden(true)
+		end
 	end
 
-	indicatorControl:SetHidden(false)
 end
 
 local function AddResearchIndicators(self)

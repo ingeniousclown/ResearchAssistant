@@ -90,7 +90,7 @@ function ResearchAssistantScanner:CheckIsItemResearchable(bagId, slotIndex)
 	end
 
 	local _,_,_,_,_,equipType = GetItemInfo(bagId, slotIndex)
-	if(equipType == EQUIP_TYPE_RING or equipType == EQUIP_TYPE_AMULET) then
+	if(equipType == EQUIP_TYPE_RING or equipType == EQUIP_TYPE_NECK) then
 		return -1
 	end
 

@@ -54,9 +54,9 @@ function ResearchAssistantSettings:Initialize()
 		ornateColor = RGBAToHex(1, 1, 0, 1),
 		intricateColor = RGBAToHex(0, 1, 1, 1),
 
-		isBlacksmith = true,
-		isWoodworking = true,
-		isClothier = true,
+		isBlacksmith = {},
+		isWoodworking = {},
+		isClothier = {},
 
 		showResearched = true,
 		showUntrackedOrnate = true,
@@ -68,6 +68,29 @@ function ResearchAssistantSettings:Initialize()
 	}
 
 	settings = ZO_SavedVars:NewAccountWide("ResearchAssistant_Settings", 2, nil, defaults)
+
+	--initialize char-specific settings
+	--first, set settings to empty table to support old version transition
+	if(settings.isBlacksmith == true or settings.isBlacksmith == false) then
+		settings.isBlacksmith = {}
+	end
+	if(settings.isWoodworking == true or settings.isWoodworking == false) then
+		settings.isWoodworking = {}
+	end
+	if(settings.isClothier == true or settings.isClothier == false) then
+		settings.isClothier = {}
+	end
+
+	--now actually initialize
+	if(settings.isBlacksmith[GetUnitName("player")] == {}) then
+		settings.isBlacksmith[GetUnitName("player")] = true
+	end
+	if(not settings.isWoodworking[GetUnitName("player")] == {}) then
+		settings.isWoodworking[GetUnitName("player")] = true
+	end
+	if(not settings.isClothier[GetUnitName("player")] == {}) then
+		settings.isClothier[GetUnitName("player")] = true
+	end
 
     self:CreateOptionsMenu()
 end
@@ -102,15 +125,15 @@ function ResearchAssistantSettings:GetIntricateColor()
 end
 
 function ResearchAssistantSettings:IsBlacksmith()
-	return settings.isBlacksmith
+	return settings.isBlacksmith[GetUnitName("player")]
 end
 
 function ResearchAssistantSettings:IsWoodworking()
-	return settings.isWoodworking
+	return settings.isWoodworking[GetUnitName("player")]
 end
 
 function ResearchAssistantSettings:IsClothier()
-	return settings.isClothier
+	return settings.isClothier[GetUnitName("player")]
 end
 
 function ResearchAssistantSettings:ShowResearched()
@@ -226,25 +249,26 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 						settings.intricateColor = RGBAToHex(r, g, b, 1)
 					end)
 
-	LAM:AddHeader(panel, "RA_Tracking_Header", "Tracking Options")
+	LAM:AddHeader(panel, "RA_Character_Tracking_Header", "Character-Specific Tracking Options")
 	LAM:AddCheckbox(panel, "RA_Is_Blacksmith", str.BLACKSMITH_LABEL, str.BLACKSMITH_TOOLTIP,
-					function() return settings.isBlacksmith end,	--getFunc
+					function() return settings.isBlacksmith[GetUnitName("player")] end,	--getFunc
 					function(value)							--setFunc
-						settings.isBlacksmith = value
+						settings.isBlacksmith[GetUnitName("player")] = value
 					end)
 
 	LAM:AddCheckbox(panel, "RA_Is_Clothier", str.CLOTHIER_LABEL, str.CLOTHIER_TOOLTIP,
-					function() return settings.isClothier end,	--getFunc
+					function() return settings.isClothier[GetUnitName("player")] end,	--getFunc
 					function(value)							--setFunc
-						settings.isClothier = value
+						settings.isClothier[GetUnitName("player")] = value
 					end)
 
 	LAM:AddCheckbox(panel, "RA_Is_Woodworking", str.WOODWORKING_LABEL, str.WOODWORKING_TOOLTIP,
-					function() return settings.isWoodworking end,	--getFunc
+					function() return settings.isWoodworking[GetUnitName("player")] end,	--getFunc
 					function(value)							--setFunc
-						settings.isWoodworking = value
+						settings.isWoodworking[GetUnitName("player")] = value
 					end)
 
+	LAM:AddHeader(panel, "RA_Misc_Tracking_Header", "Miscellaneous Tracking Options")
 	LAM:AddCheckbox(panel, "RA_Show_Researched", str.SHOW_RESEARCHED_LABEL, str.SHOW_RESEARCHED_TOOLTIP,
 					function() return settings.showResearched end,	--getFunc
 					function(value)							--setFunc
@@ -268,7 +292,7 @@ function ResearchAssistantSettings:GetLanguage()
 	local lang = GetCVar("language.2")
 
 	--check for supported languages
-	if(lang == "de" or lang == "en") then return lang end
+	if(lang == "de" or lang == "en" or lang == "fr") then return lang end
 
 	--return english if not supported
 	return "en"

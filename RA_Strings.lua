@@ -83,5 +83,47 @@ RA_Strings = {
 			SHOW_TOOLTIPS_LABEL = "Zeige Icon Tooltips?",
 			SHOW_TOOLTIPS_TOOLTIP = "Sollen erklärende Tooltips an den Icons angezeigt werden?"
 		}
+	},
+	["fr"] = {
+		SETTINGS = {
+			ICON_LABEL = "Style de l\'icone",
+			ICON_TOOLTIP = "Choisir l\'apparence de l\'icone de l\'Assistant de Recherche.",
+
+			RESEARCHABLE_LABEL = "Couleur pour la recherche",
+			RESEARCHABLE_TOOLTIP = "Choisir la couleur de l\'icone qui s\'affiche lorsque le trait n\'est pas encore connu.",
+
+			DUPLICATE_LABEL = "Couleur pour les doublons",
+			DUPLICATE_TOOLTIP = "Choisir la couleur de l\'icone qui s\'affiche lorsque le trait n\'est pas encore connu mais que vous poss\195\169dez un meilleur candidat \195\160 la recherche (vous poss\195\169dez un autre objet, de moins bonne qualit\195\169, avec le m\195\170me trait).",
+
+			RESEARCHED_LABEL = "Couleur des traits connus",
+			RESEARCHED_TOOLTIP = "Choisir la couleur de l\'icone qui s\'affiche lorsque le trait est d\195\169j\195\160 connu.",
+
+			ORNATE_LABEL = "Couleur du trait Orn\195\169",
+			ORNATE_TOOLTIP = "Choisir la couleur de l\'icone qui s\'affiche pour les objets poss\195\169dant le trait \"Orn\195\169\".",
+
+			INTRICATE_LABEL = "Couleur du trait Complexe",
+			INTRICATE_TOOLTIP = "Choisir la couleur de l\'icone qui s\'affiche pour les objets poss\195\169dant le trait \"Complexe\".",
+
+			BLACKSMITH_LABEL = "Activer pour la Forge",
+			BLACKSMITH_TOOLTIP = "Activer l\'Assistant de Recherche pour la Forge.",
+
+			CLOTHIER_LABEL = "Activer pour la Couture",
+			CLOTHIER_TOOLTIP = "Activer l\'Assistant de Recherche pour la Couture.",
+
+			WOODWORKING_LABEL = "Activer pour le Travail du bois",
+			WOODWORKING_TOOLTIP = "Activer l\'Assistant de Recherche pour le Travail du bois.",
+
+			SHOW_RESEARCHED_LABEL = "Afficher si d\195\169j\195\160 connu",
+			SHOW_RESEARCHED_TOOLTIP = "Afficher l\'icone de l\'Assistant de Recherche si le trait est d\195\169j\195\160 connu.",
+
+			SHOW_ORNATE_LABEL = "Toujours afficher le trait Orn\195\169",
+			SHOW_ORNATE_TOOLTIP = "Afficher l\'icone de recherche pour les objets poss\195\169dant le trait \"Orn\195\169\".",
+
+			SHOW_INTRICATE_LABEL = "Toujours afficher le trait Complexe",
+			SHOW_INTRICATE_TOOLTIP = "Afficher l\'icone de recherche pour les objets poss\195\169dant le trait \"Complexe\".",
+
+			SHOW_TOOLTIPS_LABEL = "Afficher l\'infobulle des icones",
+			SHOW_TOOLTIPS_TOOLTIP = "Afficher une bulle d\'aide lorsque vous passez le curseur de la souris sur les icones de l\'Assistant de Recherche."
+		}
 	}
 }

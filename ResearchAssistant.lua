@@ -2,7 +2,8 @@
 --ResearchAssistant.lua
 --Author: ingeniousclown, with some minor modifications by tejón
 		--German translation by Tonyleila
---v0.6.5
+		--French translation by Ykses
+--v0.6.6
 --[[
 Shows you when you can sell an item instead of saving it for
 research.
@@ -31,6 +32,13 @@ local tooltips = {
 		duplicate = "Besserer Analyse Kandidat vorhanden!",
 		canResearch = "Unbekannte Eigenschaft!",
 		alreadyResearched = "Bereits bekannt!"
+	},
+	["fr"] = {
+		ornate = "Orn\195\169 : Vous devriez le vendre !",
+		intricate = "Complexe : Vous devriez le d\195\169construire !",
+		duplicate = "Vous poss\195\169dez d\195\169j\195\160 un objet de moins bonne qualit\195\169 pour effectuer cette recherche !",
+		canResearch = "Vous ne connaissez pas encore ce trait !",
+		alreadyResearched = "Vous connaissez d\195\169j\195\160 ce trait !"
 	}
 }
 
@@ -131,7 +139,8 @@ local function AddResearchIndicatorToSlot(control)
 	indicatorControl:SetHidden(false)
 	if(magicTrait and magicTrait >= 0) then
 		local thisValue = RAScanner:CreateItemPreferenceValue(bagId, slotIndex)
-		if(RAScanner:GetTrait(magicTrait) and thisValue > RAScanner:GetTrait(magicTrait)) then
+		local stackSize = control.dataEntry.data.stackCount or 0
+		if(RAScanner:GetTrait(magicTrait) and (thisValue > RAScanner:GetTrait(magicTrait) or stackSize > 1)) then
 			indicatorControl:SetColor(unpack(RASettings:GetDuplicateUnresearchedColor()))
 			HandleTooltips(indicatorControl, tooltips[RASettings:GetLanguage()].duplicate)
 		else

@@ -3,7 +3,7 @@
 --Author: ingeniousclown, with some minor modifications by tejón
 		--German translation by Tonyleila
 		--French translation by Ykses
---v0.6.6
+--v0.6.6c
 --[[
 Shows you when you can sell an item instead of saving it for
 research.

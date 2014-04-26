@@ -82,13 +82,13 @@ function ResearchAssistantSettings:Initialize()
 	end
 
 	--now actually initialize
-	if(settings.isBlacksmith[GetUnitName("player")] == {}) then
+	if(settings.isBlacksmith[GetUnitName("player")] == nil) then
 		settings.isBlacksmith[GetUnitName("player")] = true
 	end
-	if(not settings.isWoodworking[GetUnitName("player")] == {}) then
+	if(settings.isWoodworking[GetUnitName("player")] == nil) then
 		settings.isWoodworking[GetUnitName("player")] = true
 	end
-	if(not settings.isClothier[GetUnitName("player")] == {}) then
+	if(settings.isClothier[GetUnitName("player")] == nil) then
 		settings.isClothier[GetUnitName("player")] = true
 	end
 

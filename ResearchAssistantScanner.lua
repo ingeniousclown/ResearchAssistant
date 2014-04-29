@@ -152,3 +152,16 @@ end
 function ResearchAssistantScanner:GetTrait( traitKey )
 	return self.ownedTraits[traitKey]
 end
+
+--item meant to be used externally for simple isResearchable checking of inventory items
+--maybe split off into a library later?
+--oh, look! rudimentary version-checking :3
+ResearchAssistantScanner.isExposed = true
+function ResearchAssistantScanner:IsItemResearchable(bagId, slotIndex)
+	local result = ResearchAssistantScanner:CheckIsItemResearchable(bagId, slotIndex)
+	if(result and result > 10) then
+		return true
+	else
+		return false
+	end
+end

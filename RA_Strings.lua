@@ -39,7 +39,10 @@ RA_Strings = {
 			SHOW_INTRICATE_TOOLTIP = "Should Intricate be shown for untracked skills?",
 
 			SHOW_TOOLTIPS_LABEL = "Show icon tooltips?",
-			SHOW_TOOLTIPS_TOOLTIP = "Should tooltips tell you what they are? (recommended OFF)"
+			SHOW_TOOLTIPS_TOOLTIP = "Should tooltips tell you what they are? (recommended OFF)",
+
+			SHOW_IN_GRID_LABEL = "Show in Grid View?",
+			SHOW_IN_GRID_TOOLTIP = "Should the research assistant icon show up with Inventory Grid View toggled on? (Ignore this if you don't use Inventory Grid View)"
 		}
 	},
 	["de"] = {
@@ -81,7 +84,10 @@ RA_Strings = {
 			SHOW_INTRICATE_TOOLTIP = "Sollen Items mit Inspiration trotz deaktiverten Berufen angezeigt werden?",
 
 			SHOW_TOOLTIPS_LABEL = "Zeige Icon Tooltips?",
-			SHOW_TOOLTIPS_TOOLTIP = "Sollen erklärende Tooltips an den Icons angezeigt werden?"
+			SHOW_TOOLTIPS_TOOLTIP = "Sollen erklärende Tooltips an den Icons angezeigt werden?",
+
+			SHOW_IN_GRID_LABEL = "Show in Grid View?",
+			SHOW_IN_GRID_TOOLTIP = "Should the research assistant icon show up with Inventory Grid View toggled on? (Ignore this if you don't use Inventory Grid View)"
 		}
 	},
 	["fr"] = {
@@ -123,7 +129,10 @@ RA_Strings = {
 			SHOW_INTRICATE_TOOLTIP = "Afficher l\'icone de recherche pour les objets poss\195\169dant le trait \"Complexe\".",
 
 			SHOW_TOOLTIPS_LABEL = "Afficher l\'infobulle des icones",
-			SHOW_TOOLTIPS_TOOLTIP = "Afficher une bulle d\'aide lorsque vous passez le curseur de la souris sur les icones de l\'Assistant de Recherche."
+			SHOW_TOOLTIPS_TOOLTIP = "Afficher une bulle d\'aide lorsque vous passez le curseur de la souris sur les icones de l\'Assistant de Recherche.",
+
+			SHOW_IN_GRID_LABEL = "Show in Grid View?",
+			SHOW_IN_GRID_TOOLTIP = "Should the research assistant icon show up with Inventory Grid View toggled on? (Ignore this if you don't use Inventory Grid View)"
 		}
 	}
 }

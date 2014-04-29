@@ -63,6 +63,7 @@ function ResearchAssistantSettings:Initialize()
 		showUntrackedIntricate = true,
 
 		showTooltips = false,
+		showInGrid = true,
 
 		textureName = "Modern"
 	}
@@ -152,6 +153,10 @@ function ResearchAssistantSettings:ShowTooltips()
 	return settings.showTooltips
 end
 
+function ResearchAssistantSettings:ShowInGrid()
+	return settings.showInGrid
+end
+
 function ResearchAssistantSettings:IsCraftingSkillEnabled( craftingSkillType )
 	if( craftingSkillType == CRAFTING_TYPE_BLACKSMITHING ) then
 		return self:IsBlacksmith()
@@ -201,6 +206,12 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 					function() return settings.showTooltips end,	--getFunc
 					function(value)							--setFunc
 						settings.showTooltips = value
+					end)
+
+	LAM:AddCheckbox(panel, "RA_Show_In_Grid", str.SHOW_IN_GRID_LABEL, str.SHOW_IN_GRID_TOOLTIP,
+					function() return settings.showInGrid end,	--getFunc
+					function(value)							--setFunc
+						settings.showInGrid = value
 					end)
 
 	LAM:AddHeader(panel, "RA_Colors_Header", "Color options")

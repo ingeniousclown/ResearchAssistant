@@ -3,7 +3,7 @@
 --Author: ingeniousclown, with some minor modifications by tejón
 		--German translation by Tonyleila
 		--French translation by Ykses
---v0.6.6c
+--v0.6.7
 --[[
 Shows you when you can sell an item instead of saving it for
 research.
@@ -94,6 +94,7 @@ end
 local function CreateIndicatorControl(parent)
 	local control = WINDOW_MANAGER:CreateControl(parent:GetName() .. "Research", parent, CT_TEXTURE)
 	control:SetAnchor(CENTER, parent, CENTER, 100)
+	control:SetDrawTier(DT_HIGH)
 	SetToNormal(control)
 
 	return control
@@ -136,6 +137,13 @@ local function AddResearchIndicatorToSlot(control)
 		end
 	end
 
+	control:ClearAnchors()
+	if(control:GetWidth() - control:GetHeight() < 5) then
+		indicatorControl:SetAnchor(TOPLEFT, control, TOPLEFT, 3)
+	else
+		indicatorControl:SetAnchor(CENTER, control, CENTER, 100)
+	end
+
 	indicatorControl:SetHidden(false)
 	if(magicTrait and magicTrait >= 0) then
 		local thisValue = RAScanner:CreateItemPreferenceValue(bagId, slotIndex)
@@ -164,7 +172,8 @@ local function AddResearchIndicators(self)
 end
 
 local function CheckNow(self)
-	if(#self.activeControls > 0 and not self.isGrid and not self:IsHidden()) then
+	-- if(not (self.isGrid() and not RA_Settings:ShowInGrid())) then return end
+	if(#self.activeControls > 0 and not self:IsHidden() and not (self.isGrid and not RASettings:ShowInGrid())) then
         AddResearchIndicators(self)
     end
 end

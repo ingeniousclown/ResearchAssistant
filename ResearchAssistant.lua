@@ -3,7 +3,7 @@
 --Author: ingeniousclown, with some minor modifications by tejón
 		--German translation by Tonyleila
 		--French translation by Ykses
---v0.6.7
+--v0.6.7b
 --[[
 Shows you when you can sell an item instead of saving it for
 research.
@@ -101,6 +101,7 @@ local function CreateIndicatorControl(parent)
 end
 
 local function AddResearchIndicatorToSlot(control)
+
 	local bagId = control.dataEntry.data.bagId
 	local slotIndex = control.dataEntry.data.slotIndex
 	
@@ -108,6 +109,10 @@ local function AddResearchIndicatorToSlot(control)
 	local indicatorControl = control:GetNamedChild("Research")
 	if(not indicatorControl) then
 		indicatorControl = CreateIndicatorControl(control)
+	end
+	if(control:GetWidth() - control:GetHeight() < 5 and not RASettings:ShowInGrid()) then 
+		indicatorControl:SetHidden(true)
+		return 
 	end
 
 	--hide the control for non-weapons and armor
@@ -137,7 +142,7 @@ local function AddResearchIndicatorToSlot(control)
 		end
 	end
 
-	control:ClearAnchors()
+	indicatorControl:ClearAnchors()
 	if(control:GetWidth() - control:GetHeight() < 5) then
 		indicatorControl:SetAnchor(TOPLEFT, control, TOPLEFT, 3)
 	else
@@ -171,37 +176,37 @@ local function AddResearchIndicators(self)
 	end
 end
 
-local function CheckNow(self)
-	-- if(not (self.isGrid() and not RA_Settings:ShowInGrid())) then return end
-	if(#self.activeControls > 0 and not self:IsHidden() and not (self.isGrid and not RASettings:ShowInGrid())) then
-        AddResearchIndicators(self)
-    end
-end
+-- local function CheckNow(self)
+-- 	-- if(not (self.isGrid() and not RA_Settings:ShowInGrid())) then return end
+-- 	if(#self.activeControls > 0 and not self:IsHidden() and not (self.isGrid and not RASettings:ShowInGrid())) then
+--         AddResearchIndicators(self)
+--     end
+-- end
 
 local function AreAllHidden()
 	return BANK:IsHidden() and BACKPACK:IsHidden() and GUILD_BANK:IsHidden() and DECONSTRUCTION:IsHidden()
 end
 
-local bufferTime = 50 --ms
-local elapsedTime = 0
-local function RA_OnUpdate()
-	elapsedTime = elapsedTime + GetFrameDeltaTimeMilliseconds()
-	if(RAScanner:IsScanning() or elapsedTime < bufferTime) then return end
-	elapsedTime = 0
+-- local bufferTime = 50 --ms
+-- local elapsedTime = 0
+-- local function RA_OnUpdate()
+-- 	elapsedTime = elapsedTime + GetFrameDeltaTimeMilliseconds()
+-- 	if(RAScanner:IsScanning() or elapsedTime < bufferTime) then return end
+-- 	elapsedTime = 0
 
-	if(AreAllHidden()) then return end
+-- 	if(AreAllHidden()) then return end
 
-	CheckNow(BANK)
-	CheckNow(BACKPACK)
-	CheckNow(GUILD_BANK)
-	CheckNow(DECONSTRUCTION)
-end
+-- 	CheckNow(BANK)
+-- 	CheckNow(BACKPACK)
+-- 	CheckNow(GUILD_BANK)
+-- 	CheckNow(DECONSTRUCTION)
+-- end
 
 local function RA_InvUpdate( ... )
 	RAScanner:RescanBags()
-	if(RASettings:IsActivated() and not AreAllHidden()) then
-		RA_Controller:SetHandler("OnUpdate", RA_OnUpdate)
-	end
+	-- if(RASettings:IsActivated() and not AreAllHidden()) then
+	-- 	RA_Controller:SetHandler("OnUpdate", RA_OnUpdate)
+	-- end
 end
 
 local function ResearchAssistant_Loaded(eventCode, addOnName)
@@ -212,8 +217,29 @@ local function ResearchAssistant_Loaded(eventCode, addOnName)
 	RASettings = ResearchAssistantSettings:New()
 	RAScanner = ResearchAssistantScanner:New()
 
+	--inventories hook
+	for _,v in pairs(PLAYER_INVENTORY.inventories) do
+		local listView = v.listView
+		if listView and listView.dataTypes and listView.dataTypes[1] then
+			local hookedFunctions = listView.dataTypes[1].setupCallback				
+			
+			listView.dataTypes[1].setupCallback = 
+				function(rowControl, slot)						
+					hookedFunctions(rowControl, slot)
+					AddResearchIndicatorToSlot(rowControl)
+				end				
+		end
+	end
+
+	--deconstruction hook
+	local hookedFunctions = DECONSTRUCTION.dataTypes[1].setupCallback
+	DECONSTRUCTION.dataTypes[1].setupCallback = function(rowControl, slot)
+			hookedFunctions(rowControl, slot)
+			AddResearchIndicatorToSlot(rowControl)
+		end
+
 	EVENT_MANAGER:RegisterForEvent("RA_INV_SLOT_UPDATE", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, RA_InvUpdate)
-	RA_Controller:SetHandler("OnUpdate", RA_OnUpdate)
+	-- RA_Controller:SetHandler("OnUpdate", RA_OnUpdate)
 end
 
 local function ResearchAssistant_Initialized()

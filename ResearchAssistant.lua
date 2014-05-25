@@ -3,7 +3,7 @@
 --Author: ingeniousclown, with some minor modifications by tejón
 		--German translation by Tonyleila
 		--French translation by Ykses
---v0.6.7b
+--v0.7.0
 --[[
 Shows you when you can sell an item instead of saving it for
 research.
@@ -93,7 +93,7 @@ end
 
 local function CreateIndicatorControl(parent)
 	local control = WINDOW_MANAGER:CreateControl(parent:GetName() .. "Research", parent, CT_TEXTURE)
-	control:SetAnchor(CENTER, parent, CENTER, 100)
+	control:SetAnchor(CENTER, parent, CENTER, 115)
 	control:SetDrawTier(DT_HIGH)
 	SetToNormal(control)
 
@@ -101,7 +101,6 @@ local function CreateIndicatorControl(parent)
 end
 
 local function AddResearchIndicatorToSlot(control)
-
 	local bagId = control.dataEntry.data.bagId
 	local slotIndex = control.dataEntry.data.slotIndex
 	
@@ -117,43 +116,55 @@ local function AddResearchIndicatorToSlot(control)
 
 	--hide the control for non-weapons and armor
 	local magicTrait = RAScanner:CheckIsItemResearchable(bagId, slotIndex)
-	if(magicTrait and magicTrait < 0) then
+	local craftingSkill = RAScanner:GetItemCraftingSkill(bagId, slotIndex)
+	if(magicTrait == -1 
+		or (magicTrait == 0 and not RASettings:ShowTraitless()) 
+		or (magicTrait == false and not RASettings:ShowResearched() and not RASettings:IsUseCrossCharacter())
+		or (RASettings:IsUseCrossCharacter() and RASettings:IsMultiCharSkillOff(craftingSkill))) then
 		indicatorControl:SetHidden(true)
 		return
 	end
 
-	local craftingSkill = RAScanner:GetItemCraftingSkill(bagId, slotIndex)
-	if(magicTrait and magicTrait == 9) then
+	if(magicTrait == 9) then
 		SetToOrnate(indicatorControl)
-		if(craftingSkill and not RASettings:IsCraftingSkillEnabled(craftingSkill) and not RASettings:ShowUntrackedOrnate()) then
+		if(not RASettings:IsCraftingSkillEnabled(craftingSkill) and not RASettings:ShowUntrackedOrnate()) then
 			indicatorControl:SetHidden(true)
 		end
 		return
-	elseif(magicTrait and magicTrait == 10) then
+	elseif(magicTrait == 10) then
 		SetToIntricate(indicatorControl)
-		if(craftingSkill and not RASettings:IsCraftingSkillEnabled(craftingSkill) and not RASettings:ShowUntrackedIntricate()) then
+		if(not RASettings:IsCraftingSkillEnabled(craftingSkill) and not RASettings:ShowUntrackedIntricate()) then
 			indicatorControl:SetHidden(true)
 		end
 		return
 	else
 		SetToNormal(indicatorControl)
-		if(craftingSkill and not RASettings:IsCraftingSkillEnabled(craftingSkill)) then
+		if(not RASettings:IsCraftingSkillEnabled(craftingSkill) and not RASettings:IsUseCrossCharacter()) then
+			indicatorControl:SetHidden(true)
 			return
 		end
 	end
 
 	indicatorControl:ClearAnchors()
-	if(control:GetWidth() - control:GetHeight() < 5) then
+	if(control.isGrid or control:GetWidth() - control:GetHeight() < 5) then
 		indicatorControl:SetAnchor(TOPLEFT, control, TOPLEFT, 3)
 	else
-		indicatorControl:SetAnchor(CENTER, control, CENTER, 100)
+		indicatorControl:SetAnchor(CENTER, control, CENTER, 115)
+	end
+
+	local trackedTraitKey
+	if(magicTrait == false) then
+		trackedTraitKey = RASettings:GetPreferenceValueForTrait(RAScanner:GetTraitKey(RAScanner:GetItemResearchInfo(bagId, slotIndex)))
+	else
+		trackedTraitKey = RASettings:GetPreferenceValueForTrait(magicTrait)
 	end
 
 	indicatorControl:SetHidden(false)
-	if(magicTrait and magicTrait >= 0) then
+	if((magicTrait ~= false and magicTrait ~= 0 and trackedTraitKey ~= true) 
+		or (RASettings:IsUseCrossCharacter() and trackedTraitKey ~= true and magicTrait ~= 0 and magicTrait ~= -1)) then
 		local thisValue = RAScanner:CreateItemPreferenceValue(bagId, slotIndex)
 		local stackSize = control.dataEntry.data.stackCount or 0
-		if(RAScanner:GetTrait(magicTrait) and (thisValue > RAScanner:GetTrait(magicTrait) or stackSize > 1)) then
+		if(trackedTraitKey and (thisValue > trackedTraitKey or stackSize > 1)) then
 			indicatorControl:SetColor(unpack(RASettings:GetDuplicateUnresearchedColor()))
 			HandleTooltips(indicatorControl, tooltips[RASettings:GetLanguage()].duplicate)
 		else
@@ -170,43 +181,12 @@ local function AddResearchIndicatorToSlot(control)
 
 end
 
-local function AddResearchIndicators(self)
-	for _,v in pairs(self.activeControls) do
-		AddResearchIndicatorToSlot(v)
-	end
-end
-
--- local function CheckNow(self)
--- 	-- if(not (self.isGrid() and not RA_Settings:ShowInGrid())) then return end
--- 	if(#self.activeControls > 0 and not self:IsHidden() and not (self.isGrid and not RASettings:ShowInGrid())) then
---         AddResearchIndicators(self)
---     end
--- end
-
 local function AreAllHidden()
 	return BANK:IsHidden() and BACKPACK:IsHidden() and GUILD_BANK:IsHidden() and DECONSTRUCTION:IsHidden()
 end
 
--- local bufferTime = 50 --ms
--- local elapsedTime = 0
--- local function RA_OnUpdate()
--- 	elapsedTime = elapsedTime + GetFrameDeltaTimeMilliseconds()
--- 	if(RAScanner:IsScanning() or elapsedTime < bufferTime) then return end
--- 	elapsedTime = 0
-
--- 	if(AreAllHidden()) then return end
-
--- 	CheckNow(BANK)
--- 	CheckNow(BACKPACK)
--- 	CheckNow(GUILD_BANK)
--- 	CheckNow(DECONSTRUCTION)
--- end
-
-local function RA_InvUpdate( ... )
+function ResearchAssistant_InvUpdate( ... )
 	RAScanner:RescanBags()
-	-- if(RASettings:IsActivated() and not AreAllHidden()) then
-	-- 	RA_Controller:SetHandler("OnUpdate", RA_OnUpdate)
-	-- end
 end
 
 local function ResearchAssistant_Loaded(eventCode, addOnName)
@@ -215,7 +195,7 @@ local function ResearchAssistant_Loaded(eventCode, addOnName)
     end
 
 	RASettings = ResearchAssistantSettings:New()
-	RAScanner = ResearchAssistantScanner:New()
+	RAScanner = ResearchAssistantScanner:New(RASettings)
 
 	--inventories hook
 	for _,v in pairs(PLAYER_INVENTORY.inventories) do
@@ -238,7 +218,7 @@ local function ResearchAssistant_Loaded(eventCode, addOnName)
 			AddResearchIndicatorToSlot(rowControl)
 		end
 
-	EVENT_MANAGER:RegisterForEvent("RA_INV_SLOT_UPDATE", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, RA_InvUpdate)
+	EVENT_MANAGER:RegisterForEvent("RA_INV_SLOT_UPDATE", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, ResearchAssistant_InvUpdate)
 	-- RA_Controller:SetHandler("OnUpdate", RA_OnUpdate)
 end
 

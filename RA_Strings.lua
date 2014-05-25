@@ -32,6 +32,9 @@ RA_Strings = {
 			SHOW_RESEARCHED_LABEL = "Show researched icon?",
 			SHOW_RESEARCHED_TOOLTIP = "Should the icon show up for traits that you know?",
 
+			SHOW_TRAITLESS_LABEL = "Show researched icon on traitless?",
+			SHOW_TRAITLESS_TOOLTIP = "Should the icon show up for traitless equipment?",
+
 			SHOW_ORNATE_LABEL = "Always show Ornate?",
 			SHOW_ORNATE_TOOLTIP = "Should Ornate be shown for untracked skills?",
 
@@ -42,7 +45,19 @@ RA_Strings = {
 			SHOW_TOOLTIPS_TOOLTIP = "Should tooltips tell you what they are? (recommended OFF)",
 
 			SHOW_IN_GRID_LABEL = "Show in Grid View?",
-			SHOW_IN_GRID_TOOLTIP = "Should the research assistant icon show up with Inventory Grid View toggled on? (Ignore this if you don't use Inventory Grid View)"
+			SHOW_IN_GRID_TOOLTIP = "Should the research assistant icon show up with Inventory Grid View toggled on? (Ignore this if you don't use Inventory Grid View)",
+
+			CROSS_CHAR_LABEL = "Use cross-character tracking?",
+			CROSS_CHAR_TOOLTIP = "Should Research Assistant use cross-character tracking? (Character-specific setting)",
+
+			BS_CHAR_LABEL = "Blacksmithing Character",
+			BS_CHAR_TOOLTIP = "Which character is your blacksmithing character?",
+
+			CL_CHAR_LABEL = "Clothier Character",
+			CL_CHAR_TOOLTIP = "Which character is your clothier character?",
+
+			WW_CHAR_LABEL = "Woodworking Character",
+			WW_CHAR_TOOLTIP = "Which character is your woodworking character?"
 		}
 	},
 	["de"] = {
@@ -77,6 +92,9 @@ RA_Strings = {
 			SHOW_RESEARCHED_LABEL = "Show researched icon? (tr)",
 			SHOW_RESEARCHED_TOOLTIP = "Should the icon show up for traits that you know? (tr)",
 
+			SHOW_TRAITLESS_LABEL = "Show researched icon on traitless?",
+			SHOW_TRAITLESS_TOOLTIP = "Should the icon show up for traitless equipment?",
+
 			SHOW_ORNATE_LABEL = "Hohen Verkaufspreis immer zeigen?",
 			SHOW_ORNATE_TOOLTIP = "Sollen Items mit hohen Verkaufspreis trotz deaktiverten Berufen angezeigt werden?",
 
@@ -87,7 +105,19 @@ RA_Strings = {
 			SHOW_TOOLTIPS_TOOLTIP = "Sollen erklärende Tooltips an den Icons angezeigt werden?",
 
 			SHOW_IN_GRID_LABEL = "Show in Grid View?",
-			SHOW_IN_GRID_TOOLTIP = "Should the research assistant icon show up with Inventory Grid View toggled on? (Ignore this if you don't use Inventory Grid View)"
+			SHOW_IN_GRID_TOOLTIP = "Should the research assistant icon show up with Inventory Grid View toggled on? (Ignore this if you don't use Inventory Grid View)",
+
+			CROSS_CHAR_LABEL = "Use cross-character tracking?",
+			CROSS_CHAR_TOOLTIP = "Should Research Assistant use cross-character tracking? (Character-specific setting)",
+
+			BS_CHAR_LABEL = "Blacksmithing Character",
+			BS_CHAR_TOOLTIP = "Which character is your blacksmithing character?",
+
+			CL_CHAR_LABEL = "Clothier Character",
+			CL_CHAR_TOOLTIP = "Which character is your clothier character?",
+
+			WW_CHAR_LABEL = "Woodworking Character",
+			WW_CHAR_TOOLTIP = "Which character is your woodworking character?"
 		}
 	},
 	["fr"] = {
@@ -122,6 +152,9 @@ RA_Strings = {
 			SHOW_RESEARCHED_LABEL = "Afficher si d\195\169j\195\160 connu",
 			SHOW_RESEARCHED_TOOLTIP = "Afficher l\'icone de l\'Assistant de Recherche si le trait est d\195\169j\195\160 connu.",
 
+			SHOW_TRAITLESS_LABEL = "Show researched icon on traitless?",
+			SHOW_TRAITLESS_TOOLTIP = "Should the icon show up for traitless equipment?",
+
 			SHOW_ORNATE_LABEL = "Toujours afficher le trait Orn\195\169",
 			SHOW_ORNATE_TOOLTIP = "Afficher l\'icone de recherche pour les objets poss\195\169dant le trait \"Orn\195\169\".",
 
@@ -132,7 +165,19 @@ RA_Strings = {
 			SHOW_TOOLTIPS_TOOLTIP = "Afficher une bulle d\'aide lorsque vous passez le curseur de la souris sur les icones de l\'Assistant de Recherche.",
 
 			SHOW_IN_GRID_LABEL = "Show in Grid View?",
-			SHOW_IN_GRID_TOOLTIP = "Should the research assistant icon show up with Inventory Grid View toggled on? (Ignore this if you don't use Inventory Grid View)"
+			SHOW_IN_GRID_TOOLTIP = "Should the research assistant icon show up with Inventory Grid View toggled on? (Ignore this if you don't use Inventory Grid View)",
+
+			CROSS_CHAR_LABEL = "Use cross-character tracking?",
+			CROSS_CHAR_TOOLTIP = "Should Research Assistant use cross-character tracking? (Character-specific setting)",
+
+			BS_CHAR_LABEL = "Blacksmithing Character",
+			BS_CHAR_TOOLTIP = "Which character is your blacksmithing character?",
+
+			CL_CHAR_LABEL = "Clothier Character",
+			CL_CHAR_TOOLTIP = "Which character is your clothier character?",
+
+			WW_CHAR_LABEL = "Woodworking Character",
+			WW_CHAR_TOOLTIP = "Which character is your woodworking character?"
 		}
 	}
 }

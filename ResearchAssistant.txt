@@ -1,11 +1,12 @@
 ## Title: Research Assistant
 ## Author: ingeniousclown
-## Version: 0.6.7b
-## APIVersion: 100003
+## Version: 0.7.0
+## APIVersion: 100004
 ## SavedVariables: ResearchAssistant_Settings
 
 lib\LibStub\LibStub.lua
 lib\LibAddonMenu-1.0\LibAddonMenu-1.0.lua
+lib\libResearch\libResearch.lua
 
 RA_Strings.lua
 ResearchAssistantSettings.lua

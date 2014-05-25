@@ -1,20 +1,22 @@
 
 ResearchAssistantScanner = ZO_Object:Subclass()
+libResearch = LibStub("libResearch")
 
 local BLACKSMITH = CRAFTING_TYPE_BLACKSMITHING
 local CLOTHIER = CRAFTING_TYPE_CLOTHIER
 local WOODWORK = CRAFTING_TYPE_WOODWORKING
 
-function ResearchAssistantScanner:New()
+function ResearchAssistantScanner:New( ... )
 	local obj = ZO_Object.New(self)
-	obj:Initialize()
+	obj:Initialize(...)
 	return obj
 end
 
-function ResearchAssistantScanner:Initialize()
+function ResearchAssistantScanner:Initialize( settings )
 	self.ownedTraits = {}
 	self.isScanning = false
 	self.scanMore = 0
+	self.settingsPtr = settings
 
 	self:RescanBags()
 end
@@ -23,14 +25,7 @@ function ResearchAssistantScanner:IsScanning()
 	return self.isScanning
 end
 
-function ResearchAssistantScanner:GetItemCraftingSkill(bagId, slotIndex)
-	if(CanItemBeSmithingExtractedOrRefined(bagId, slotIndex, BLACKSMITH)) then return BLACKSMITH end
-	if(CanItemBeSmithingExtractedOrRefined(bagId, slotIndex, CLOTHIER)) then return CLOTHIER end
-	if(CanItemBeSmithingExtractedOrRefined(bagId, slotIndex, WOODWORK)) then return WOODWORK end
-	return nil
-end
-
-function ResearchAssistantScanner:CreateItemPreferenceValue(bagId, slotIndex)
+function ResearchAssistantScanner:CreateItemPreferenceValue( bagId, slotIndex )
     local _,_,_,_,_,_,_,quality = GetItemInfo(bagId, slotIndex)
     if (not quality) then
         quality = 0
@@ -58,63 +53,13 @@ function ResearchAssistantScanner:CreateItemPreferenceValue(bagId, slotIndex)
     return quality * 10000000 + level * 10000 + where * 1000 + slotIndex
 end
 
-function ResearchAssistantScanner:CheckIsItemResearchableInSkill(bagId, slotIndex, equipType, craftingSkillType, traitIndex)
-	--if it can't be extracted or refined here, then it can't be researched!
-	if not CanItemBeSmithingExtractedOrRefined(bagId, slotIndex, craftingSkillType) then return nil end
-	
-	local numLines = GetNumSmithingResearchLines(craftingSkillType)
-
-	for i=1, numLines do
-		if (CanItemBeSmithingTraitResearched(bagId, slotIndex, craftingSkillType, i, traitIndex)
-			and not GetSmithingResearchLineTraitTimes( craftingSkillType, i, traitIndex)) then --if not nil, then researching
-			return craftingSkillType * 1000000 + equipType * 10000 + i * 100 + traitIndex
-		end
-	end
-
-	return nil  --nil will evaluate as false
-end
-
-function ResearchAssistantScanner:CheckIsItemResearchable(bagId, slotIndex)
-	local itemType = GetItemType(bagId, slotIndex)
-	if(itemType ~= ITEMTYPE_ARMOR and itemType ~= ITEMTYPE_WEAPON) then
-		return -1
-	end
-
-	local traitType = GetItemTrait(bagId, slotIndex)
-	local traitIndex = traitType
-
-	if(traitIndex == ITEM_TRAIT_TYPE_ARMOR_ORNATE or traitIndex == ITEM_TRAIT_TYPE_WEAPON_ORNATE or traitIndex == ITEM_TRAIT_TYPE_JEWELRY_ORNATE) then
-		return 9
-	elseif(traitIndex == ITEM_TRAIT_TYPE_ARMOR_INTRICATE or traitIndex == ITEM_TRAIT_TYPE_WEAPON_INTRICATE or traitIndex == ITEM_TRAIT_TYPE_JEWELRY_INTRICATE) then
-		return 10
-	end
-
-	local _,_,_,_,_,equipType = GetItemInfo(bagId, slotIndex)
-	if(equipType == EQUIP_TYPE_RING or equipType == EQUIP_TYPE_NECK) then
-		return -1
-	end
-
-	--this used to be "if(itemType == ITEMTYPE_ARMOR)", but shields are not armor even though they are armor
-	if(traitIndex > 10) then
-		traitIndex = traitIndex - 10;
-	end
-
-	if(not (traitIndex >= 1 and traitIndex <=8)) then
-		return nil
-	end
-
-	return self:CheckIsItemResearchableInSkill(bagId, slotIndex, equipType, BLACKSMITH, traitIndex)
-		or self:CheckIsItemResearchableInSkill(bagId, slotIndex, equipType, CLOTHIER, traitIndex)
-	 	or self:CheckIsItemResearchableInSkill(bagId, slotIndex, equipType, WOODWORK, traitIndex)
-end
-
 function ResearchAssistantScanner:ScanBag( bagId )
 	local _, numSlots = GetBagInfo(bagId)
 	for i=1, numSlots do
 		local magicNumber = self:CheckIsItemResearchable(bagId, i)
-		if(magicNumber and magicNumber >= 0) then 
-			local prefValue = self:CreateItemPreferenceValue(bagId, i)
-			if(self.ownedTraits[magicNumber]) then
+		local prefValue = self:CreateItemPreferenceValue(bagId, i)
+		if(magicNumber and magicNumber >= 10) then 
+			if(self.ownedTraits[magicNumber] and self.ownedTraits[magicNumber] ~= true) then
 				if(prefValue < self.ownedTraits[magicNumber]) then
 					self.ownedTraits[magicNumber] = prefValue
 				end
@@ -123,6 +68,31 @@ function ResearchAssistantScanner:ScanBag( bagId )
 			end
 		end
 	end
+end
+
+function ResearchAssistantScanner:ScanKnownTraits()
+	for researchLineIndex=1,GetNumSmithingResearchLines(BLACKSMITH) do
+		for traitIndex=1,8 do
+			if (libResearch:IsCraftingTraitKnownOrResearching(BLACKSMITH, researchLineIndex, traitIndex)) then --if not nil, then researching
+				self.ownedTraits[self:GetTraitKey(BLACKSMITH, researchLineIndex, traitIndex)] = true
+			end
+		end
+	end
+	for researchLineIndex=1,GetNumSmithingResearchLines(CLOTHIER) do
+		for traitIndex=1,8 do
+			if (libResearch:IsCraftingTraitKnownOrResearching(CLOTHIER, researchLineIndex, traitIndex)) then --if not nil, then researching
+				self.ownedTraits[self:GetTraitKey(CLOTHIER, researchLineIndex, traitIndex)] = true
+			end
+		end
+	end
+	for researchLineIndex=1,GetNumSmithingResearchLines(WOODWORK) do
+		for traitIndex=1,8 do
+			if (libResearch:IsCraftingTraitKnownOrResearching(WOODWORK, researchLineIndex, traitIndex)) then --if not nil, then researching
+				self.ownedTraits[self:GetTraitKey(WOODWORK, researchLineIndex, traitIndex)] = true
+			end
+		end
+	end
+
 end
 
 function ResearchAssistantScanner:RescanBags()
@@ -140,6 +110,9 @@ function ResearchAssistantScanner:RescanBags()
 	self:ScanBag(BAG_BACKPACK)
 	self:ScanBag(BAG_BANK)
 
+	self:ScanKnownTraits()
+	self.settingsPtr:SetKnownTraits(self.ownedTraits)
+
 	if(self.scanMore ~= 0) then
 		self.scanMore = self.scanMore - 1
 		self.isScanning = false
@@ -148,20 +121,39 @@ function ResearchAssistantScanner:RescanBags()
 		self.isScanning = false
 	end
 end
-
+ 
 function ResearchAssistantScanner:GetTrait( traitKey )
 	return self.ownedTraits[traitKey]
 end
 
---item meant to be used externally for simple isResearchable checking of inventory items
---maybe split off into a library later?
+--wrapping the libResearch so I can use it but not have to search for all the references :P
 --oh, look! rudimentary version-checking :3
-ResearchAssistantScanner.isExposed = true
-function ResearchAssistantScanner:IsItemResearchable(bagId, slotIndex)
-	local result = ResearchAssistantScanner:CheckIsItemResearchable(bagId, slotIndex)
-	if(result and result > 10) then
-		return true
-	else
-		return false
-	end
+ResearchAssistantScanner.isExposed = true  --deprecated
+--anything greater than 10 is researchable
+function ResearchAssistantScanner:CheckIsItemResearchable( bagId, slotIndex )
+	return libResearch:DetailedIsItemResearchable(bagId, slotIndex)
+end
+
+function ResearchAssistantScanner:IsItemResearchable( bagId, slotIndex )
+	return libResearch:IsItemResearchable(bagId,slotIndex)
+end
+
+function ResearchAssistantScanner:GetTraitKey( craftingSkillType, researchLineIndex, traitIndex )
+	return libResearch:GetTraitKey(craftingSkillType, researchLineIndex, traitIndex)
+end
+
+function ResearchAssistantScanner:GetItemCraftingSkill( bagId, slotIndex )
+	return libResearch:GetItemCraftingSkill(bagId, slotIndex)
+end
+
+function ResearchAssistantScanner:GetResearchTraitIndex( bagId, slotIndex )
+	return libResearch:GetResearchTraitIndex(bagId, slotIndex)
+end
+
+function ResearchAssistantScanner:GetResearchLineIndex( bagId, slotIndex )
+	return libResearch:GetResearchLineIndex(bagId, slotIndex)
+end
+
+function ResearchAssistantScanner:GetItemResearchInfo( bagId, slotIndex )
+	return libResearch:GetItemResearchInfo(bagId, slotIndex)
 end

@@ -3,6 +3,7 @@ ResearchAssistantSettings = ZO_Object:Subclass()
 
 local LAM = LibStub("LibAddonMenu-1.0")
 local settings = nil
+local _
 
 local CAN_RESEARCH_TEXTURES = {
 	["Classic"] = {
@@ -46,11 +47,15 @@ end
 function ResearchAssistantSettings:Initialize()
 	local defaults = {
 		raToggle = true,
+		multiCharacter = false,
+
+		textureName = "Modern",
+		showTooltips = false,
+		showInGrid = true,
 
 		canResearchColor = RGBAToHex(1, .25, 0, 1),
 		duplicateUnresearchedColor = RGBAToHex(1, 1, 0, 1),
 		alreadyResearchedColor = RGBAToHex(.5, .5, .5, 1),
-
 		ornateColor = RGBAToHex(1, 1, 0, 1),
 		intricateColor = RGBAToHex(0, 1, 1, 1),
 
@@ -59,13 +64,17 @@ function ResearchAssistantSettings:Initialize()
 		isClothier = {},
 
 		showResearched = true,
+		showTraitless = true,
 		showUntrackedOrnate = true,
 		showUntrackedIntricate = true,
 
-		showTooltips = false,
-		showInGrid = true,
+		useCrossCharacter = {},
+		blacksmithCharacter = {},
+		woodworkingCharacter = {},
+		clothierCharacter = {},
 
-		textureName = "Modern"
+		--non settings variables
+		acquiredTraits = {}
 	}
 
 	settings = ZO_SavedVars:NewAccountWide("ResearchAssistant_Settings", 2, nil, defaults)
@@ -91,6 +100,18 @@ function ResearchAssistantSettings:Initialize()
 	end
 	if(settings.isClothier[GetUnitName("player")] == nil) then
 		settings.isClothier[GetUnitName("player")] = true
+	end
+
+	--initialize this character's x-char settings
+	if(settings.useCrossCharacter[GetUnitName("player")] == nil)  then
+		settings.useCrossCharacter[GetUnitName("player")] = false
+	end
+
+	--either all are nil or none are
+	if(not settings.blacksmithCharacter[GetUnitName("player")]) then
+		settings.blacksmithCharacter[GetUnitName("player")] = GetUnitName("player")
+		settings.woodworkingCharacter[GetUnitName("player")] = GetUnitName("player")
+		settings.clothierCharacter[GetUnitName("player")] = GetUnitName("player")
 	end
 
     self:CreateOptionsMenu()
@@ -141,6 +162,10 @@ function ResearchAssistantSettings:ShowResearched()
 	return settings.showResearched
 end
 
+function ResearchAssistantSettings:ShowTraitless()
+	return settings.showTraitless
+end
+
 function ResearchAssistantSettings:ShowUntrackedOrnate()
 	return settings.showUntrackedOrnate
 end
@@ -155,6 +180,56 @@ end
 
 function ResearchAssistantSettings:ShowInGrid()
 	return settings.showInGrid
+end
+
+function ResearchAssistantSettings:SetKnownTraits( traitsTable )
+	settings.acquiredTraits[GetUnitName("player")] = traitsTable
+end
+
+function ResearchAssistantSettings:IsUseCrossCharacter()
+	return settings.useCrossCharacter[GetUnitName("player")]
+end
+
+function ResearchAssistantSettings:GetCraftingCharacterTraits( craftingSkillType )
+	if( not settings.useCrossCharacter[GetUnitName("player")] ) then
+		return self:GetPlayerTraits()
+	end
+
+	if( craftingSkillType == CRAFTING_TYPE_BLACKSMITHING ) then
+		return settings.acquiredTraits[settings.blacksmithCharacter[GetUnitName("player")]]
+	elseif( craftingSkillType == CRAFTING_TYPE_CLOTHIER ) then
+		return settings.acquiredTraits[settings.clothierCharacter[GetUnitName("player")]]
+	elseif( craftingSkillType == CRAFTING_TYPE_WOODWORKING ) then
+		return settings.acquiredTraits[settings.woodworkingCharacter[GetUnitName("player")]]
+	else
+		return self:GetPlayerTraits()
+	end
+end
+
+function ResearchAssistantSettings:GetPlayerTraits()
+	return settings.acquiredTraits[GetUnitName("player")]
+end
+
+function ResearchAssistantSettings:GetTraits()
+	return settings.acquiredTraits
+end
+
+function ResearchAssistantSettings:IsMultiCharSkillOff( craftingSkillType )
+	if( craftingSkillType == CRAFTING_TYPE_BLACKSMITHING ) then
+		return settings.blacksmithCharacter[GetUnitName("player")] == "off"
+	elseif( craftingSkillType == CRAFTING_TYPE_CLOTHIER ) then
+		return settings.clothierCharacter[GetUnitName("player")] == "off"
+	elseif( craftingSkillType == CRAFTING_TYPE_WOODWORKING ) then
+		return settings.woodworkingCharacter[GetUnitName("player")] == "off"
+	else
+		return assert(false, "Invalid crafting skill type")
+	end
+end
+
+function ResearchAssistantSettings:GetPreferenceValueForTrait( traitKey )
+	if(not traitKey) then return nil end
+	local traits = self:GetCraftingCharacterTraits(zo_floor(traitKey / 10000))
+	return traits[traitKey]
 end
 
 function ResearchAssistantSettings:IsCraftingSkillEnabled( craftingSkillType )
@@ -196,6 +271,7 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 						settings.textureName = value
 						icon:SetTexture(CAN_RESEARCH_TEXTURES[value].texturePath)
 						icon:SetDimensions(CAN_RESEARCH_TEXTURES[settings.textureName].textureSize, CAN_RESEARCH_TEXTURES[settings.textureName].textureSize)
+						ResearchAssistant_InvUpdate()
 					end)
 	icon:SetParent(dropdown)
 	icon:SetTexture(CAN_RESEARCH_TEXTURES[settings.textureName].texturePath)
@@ -206,12 +282,14 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 					function() return settings.showTooltips end,	--getFunc
 					function(value)							--setFunc
 						settings.showTooltips = value
+						ResearchAssistant_InvUpdate()
 					end)
 
 	LAM:AddCheckbox(panel, "RA_Show_In_Grid", str.SHOW_IN_GRID_LABEL, str.SHOW_IN_GRID_TOOLTIP,
 					function() return settings.showInGrid end,	--getFunc
 					function(value)							--setFunc
 						settings.showInGrid = value
+						ResearchAssistant_InvUpdate()
 					end)
 
 	LAM:AddHeader(panel, "RA_Colors_Header", "Color options")
@@ -222,6 +300,7 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 					end,
 					function(r, g, b)
 						settings.canResearchColor = RGBAToHex(r, g, b, 1)
+						ResearchAssistant_InvUpdate()
 					end)
 
 	LAM:AddColorPicker(panel, "RA_Duplicate_Can_Research_Color_Picker", str.DUPLICATE_LABEL, str.DUPLICATE_TOOLTIP,
@@ -231,6 +310,7 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 					end,
 					function(r, g, b)
 						settings.duplicateUnresearchedColor = RGBAToHex(r, g, b, 1)
+						ResearchAssistant_InvUpdate()
 					end)
 
 	LAM:AddColorPicker(panel, "RA_Already_Researched_Color_Picker", str.RESEARCHED_LABEL, str.RESEARCHED_TOOLTIP,
@@ -240,6 +320,7 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 					end,
 					function(r, g, b)
 						settings.alreadyResearchedColor = RGBAToHex(r, g, b, 1)
+						ResearchAssistant_InvUpdate()
 					end)
 
 	LAM:AddColorPicker(panel, "RA_Ornate_Color_Picker", str.ORNATE_LABEL, str.ORNATE_TOOLTIP,
@@ -249,6 +330,7 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 					end,
 					function(r, g, b)
 						settings.ornateColor = RGBAToHex(r, g, b, 1)
+						ResearchAssistant_InvUpdate()
 					end)
 
 	LAM:AddColorPicker(panel, "RA_Intricate_Color_Picker", str.INTRICATE_LABEL, str.INTRICATE_TOOLTIP,
@@ -258,6 +340,7 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 					end,
 					function(r, g, b)
 						settings.intricateColor = RGBAToHex(r, g, b, 1)
+						ResearchAssistant_InvUpdate()
 					end)
 
 	LAM:AddHeader(panel, "RA_Character_Tracking_Header", "Character-Specific Tracking Options")
@@ -265,18 +348,21 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 					function() return settings.isBlacksmith[GetUnitName("player")] end,	--getFunc
 					function(value)							--setFunc
 						settings.isBlacksmith[GetUnitName("player")] = value
+						ResearchAssistant_InvUpdate()
 					end)
 
 	LAM:AddCheckbox(panel, "RA_Is_Clothier", str.CLOTHIER_LABEL, str.CLOTHIER_TOOLTIP,
 					function() return settings.isClothier[GetUnitName("player")] end,	--getFunc
 					function(value)							--setFunc
 						settings.isClothier[GetUnitName("player")] = value
+						ResearchAssistant_InvUpdate()
 					end)
 
 	LAM:AddCheckbox(panel, "RA_Is_Woodworking", str.WOODWORKING_LABEL, str.WOODWORKING_TOOLTIP,
 					function() return settings.isWoodworking[GetUnitName("player")] end,	--getFunc
 					function(value)							--setFunc
 						settings.isWoodworking[GetUnitName("player")] = value
+						ResearchAssistant_InvUpdate()
 					end)
 
 	LAM:AddHeader(panel, "RA_Misc_Tracking_Header", "Miscellaneous Tracking Options")
@@ -284,18 +370,65 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 					function() return settings.showResearched end,	--getFunc
 					function(value)							--setFunc
 						settings.showResearched = value
+						ResearchAssistant_InvUpdate()
+					end)
+
+	LAM:AddCheckbox(panel, "RA_Show_Traitless", str.SHOW_TRAITLESS_LABEL, str.SHOW_TRAITLESS_TOOLTIP,
+					function() return settings.showTraitless end,	--getFunc
+					function(value)							--setFunc
+						settings.showTraitless = value
+						ResearchAssistant_InvUpdate()
 					end)
 
 	LAM:AddCheckbox(panel, "RA_Show_Untracked_Ornate", str.SHOW_ORNATE_LABEL, str.SHOW_ORNATE_TOOLTIP,
 					function() return settings.showUntrackedOrnate end,	--getFunc
 					function(value)							--setFunc
 						settings.showUntrackedOrnate = value
+						ResearchAssistant_InvUpdate()
 					end)
 
 	LAM:AddCheckbox(panel, "RA_Show_Untracked_Intricate", str.SHOW_INTRICATE_LABEL, str.SHOW_INTRICATE_TOOLTIP,
 					function() return settings.showUntrackedIntricate end,	--getFunc
 					function(value)							--setFunc
 						settings.showUntrackedIntricate = value
+						ResearchAssistant_InvUpdate()
+					end)
+
+	local knownCharacters = { "off" }
+	for k,_ in pairs(settings.useCrossCharacter) do
+		table.insert(knownCharacters, k)
+	end
+
+	LAM:AddHeader(panel, "RA_Cross_Char_Tracking_Header", "Cross-Character Tracking Options")
+	LAM:AddCheckbox(panel, "RA_Track_Cross_Character", str.CROSS_CHAR_LABEL, str.CROSS_CHAR_TOOLTIP,
+					function() return settings.useCrossCharacter[GetUnitName("player")] end,	--getFunc
+					function(value)							--setFunc
+						settings.useCrossCharacter[GetUnitName("player")] = value
+						ResearchAssistant_InvUpdate()
+					end)
+
+	LAM:AddDropdown(panel, "RA_Blacksmith_Char_Dropdown", str.BS_CHAR_LABEL, str.BS_CHAR_TOOLTIP, 
+					knownCharacters,
+					function() return settings.blacksmithCharacter[GetUnitName("player")] end,	--getFunc
+					function(value)							--setFunc
+						settings.blacksmithCharacter[GetUnitName("player")] = value
+						ResearchAssistant_InvUpdate()
+					end)
+
+	LAM:AddDropdown(panel, "RA_Clothier_Char_Dropdown", str.CL_CHAR_LABEL, str.CL_CHAR_TOOLTIP, 
+					knownCharacters,
+					function() return settings.clothierCharacter[GetUnitName("player")] end,	--getFunc
+					function(value)							--setFunc
+						settings.clothierCharacter[GetUnitName("player")] = value
+						ResearchAssistant_InvUpdate()
+					end)
+
+	LAM:AddDropdown(panel, "RA_Woodworking_Char_Dropdown", str.WW_CHAR_LABEL, str.WW_CHAR_TOOLTIP, 
+					knownCharacters,
+					function() return settings.woodworkingCharacter[GetUnitName("player")] end,	--getFunc
+					function(value)							--setFunc
+						settings.woodworkingCharacter[GetUnitName("player")] = value
+						ResearchAssistant_InvUpdate()
 					end)
 end
 

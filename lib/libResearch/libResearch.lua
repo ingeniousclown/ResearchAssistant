@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "libResearch", 1
+local MAJOR, MINOR = "libResearch", 2
 local libResearch, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not libResearch then return end	--the same or newer version of this lib is already loaded into memory 
 --thanks to Seerah for the previous lines and library
@@ -167,6 +167,13 @@ function libResearch:IsCraftingTraitKnownOrResearching( craftingSkillType, resea
 	else
 		return false
 	end
+end
+
+function libResearch:IsBigThreeCrafting( craftingSkillType )
+	if(craftingSkillType == BLACKSMITH or craftingSkillType == CLOTHIER or craftingSkillType == WOODWORK) then
+		return true
+	end
+	return false
 end
 
 function libResearch:GetResearchMap()

@@ -1,6 +1,6 @@
 ## Title: Research Assistant
 ## Author: ingeniousclown
-## Version: 0.7.0
+## Version: 0.7.1
 ## APIVersion: 100004
 ## SavedVariables: ResearchAssistant_Settings
 

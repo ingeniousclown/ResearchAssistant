@@ -222,7 +222,7 @@ function ResearchAssistantSettings:IsMultiCharSkillOff( craftingSkillType )
 	elseif( craftingSkillType == CRAFTING_TYPE_WOODWORKING ) then
 		return settings.woodworkingCharacter[GetUnitName("player")] == "off"
 	else
-		return assert(false, "Invalid crafting skill type")
+		return assert(false, "Invalid crafting skill type: " .. (craftingSkillType or "nil"))
 	end
 end
 

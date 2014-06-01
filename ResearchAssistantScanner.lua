@@ -157,3 +157,7 @@ end
 function ResearchAssistantScanner:GetItemResearchInfo( bagId, slotIndex )
 	return libResearch:GetItemResearchInfo(bagId, slotIndex)
 end
+
+function ResearchAssistantScanner:IsBigThreeCrafting( craftingSkillType )
+	return libResearch:IsBigThreeCrafting(craftingSkillType)
+end

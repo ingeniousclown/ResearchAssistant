@@ -3,7 +3,7 @@
 --Author: ingeniousclown, with some minor modifications by tejón
 		--German translation by Tonyleila
 		--French translation by Ykses
---v0.7.0
+--v0.7.1
 --[[
 Shows you when you can sell an item instead of saving it for
 research.
@@ -120,7 +120,7 @@ local function AddResearchIndicatorToSlot(control)
 	if(magicTrait == -1 
 		or (magicTrait == 0 and not RASettings:ShowTraitless()) 
 		or (magicTrait == false and not RASettings:ShowResearched() and not RASettings:IsUseCrossCharacter())
-		or (RASettings:IsUseCrossCharacter() and RASettings:IsMultiCharSkillOff(craftingSkill))) then
+		or (RAScanner:IsBigThreeCrafting(craftingSkill) and RASettings:IsUseCrossCharacter() and RASettings:IsMultiCharSkillOff(craftingSkill))) then
 		indicatorControl:SetHidden(true)
 		return
 	end
@@ -185,8 +185,18 @@ local function AreAllHidden()
 	return BANK:IsHidden() and BACKPACK:IsHidden() and GUILD_BANK:IsHidden() and DECONSTRUCTION:IsHidden()
 end
 
+-- a simple event buffer to make sure that the scan doesn't happen more than once in a
+-- single instance, as EVENT_INVENTORY_SINGLE_SLOT_UPDATE is very spammy, especially
+-- with junk and bank management add-ons
+local canUpdate = true
 function ResearchAssistant_InvUpdate( ... )
-	RAScanner:RescanBags()
+	if(canUpdate) then
+		canUpdate = false
+		zo_callLater(function() 
+				RAScanner:RescanBags()
+				canUpdate = true
+			end, 25)
+	end
 end
 
 local function ResearchAssistant_Loaded(eventCode, addOnName)

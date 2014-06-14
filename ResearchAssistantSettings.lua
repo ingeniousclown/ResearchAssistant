@@ -1,7 +1,7 @@
 
 ResearchAssistantSettings = ZO_Object:Subclass()
 
-local LAM = LibStub("LibAddonMenu-1.0")
+local LAM = LibStub("LibAddonMenu-2.0")
 local settings = nil
 local _
 
@@ -255,8 +255,14 @@ end
 function ResearchAssistantSettings:CreateOptionsMenu()
 	local str = RA_Strings[self:GetLanguage()].SETTINGS
 
-	local panel = LAM:CreateControlPanel("ResearchAssistantSettingsPanel", "Research Assistant Settings")
-	LAM:AddHeader(panel, "RA_Settings_Header", "General Options")
+	local panel = {
+		type = "panel",
+		name = "Research Assistant",
+		author = "ingeniousclown",
+		version = "0.7.2",
+		slashCommand = "/researchassistant",
+		registerForRefresh = true
+	}
 
 	local icon = WINDOW_MANAGER:CreateControl("RA_Icon", ZO_OptionsWindowSettingsScrollChild, CT_TEXTURE)
 	icon:SetColor(1, 1, 1, 1)
@@ -264,172 +270,284 @@ function ResearchAssistantSettings:CreateOptionsMenu()
 			self:SetTexture(CAN_RESEARCH_TEXTURES[settings.textureName].texturePath)
 			icon:SetDimensions(CAN_RESEARCH_TEXTURES[settings.textureName].textureSize, CAN_RESEARCH_TEXTURES[settings.textureName].textureSize)
 		end)
-	local dropdown = LAM:AddDropdown(panel, "RA_Icon_Dropdown", str.ICON_LABEL, str.ICON_TOOLTIP, 
-					TEXTURE_OPTIONS,
-					function() return settings.textureName end,	--getFunc
-					function(value)							--setFunc
-						settings.textureName = value
-						icon:SetTexture(CAN_RESEARCH_TEXTURES[value].texturePath)
-						icon:SetDimensions(CAN_RESEARCH_TEXTURES[settings.textureName].textureSize, CAN_RESEARCH_TEXTURES[settings.textureName].textureSize)
-						ResearchAssistant_InvUpdate()
-					end)
-	icon:SetParent(dropdown)
-	icon:SetTexture(CAN_RESEARCH_TEXTURES[settings.textureName].texturePath)
-	icon:SetDimensions(CAN_RESEARCH_TEXTURES[settings.textureName].textureSize, CAN_RESEARCH_TEXTURES[settings.textureName].textureSize)
-	icon:SetAnchor(RIGHT, dropdown:GetNamedChild("Dropdown"), LEFT, -12, 0)
-
-	LAM:AddCheckbox(panel, "RA_Show_Tooltips", str.SHOW_TOOLTIPS_LABEL, str.SHOW_TOOLTIPS_TOOLTIP,
-					function() return settings.showTooltips end,	--getFunc
-					function(value)							--setFunc
-						settings.showTooltips = value
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddCheckbox(panel, "RA_Show_In_Grid", str.SHOW_IN_GRID_LABEL, str.SHOW_IN_GRID_TOOLTIP,
-					function() return settings.showInGrid end,	--getFunc
-					function(value)							--setFunc
-						settings.showInGrid = value
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddHeader(panel, "RA_Colors_Header", "Color options")
-	LAM:AddColorPicker(panel, "RA_Can_Research_Color_Picker", str.RESEARCHABLE_LABEL, str.RESEARCHABLE_TOOLTIP,
-					function()
-						local r, g, b, a = HexToRGBA(settings.canResearchColor)
-						return r, g, b
-					end,
-					function(r, g, b)
-						settings.canResearchColor = RGBAToHex(r, g, b, 1)
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddColorPicker(panel, "RA_Duplicate_Can_Research_Color_Picker", str.DUPLICATE_LABEL, str.DUPLICATE_TOOLTIP,
-					function()
-						local r, g, b, a = HexToRGBA(settings.duplicateUnresearchedColor)
-						return r, g, b
-					end,
-					function(r, g, b)
-						settings.duplicateUnresearchedColor = RGBAToHex(r, g, b, 1)
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddColorPicker(panel, "RA_Already_Researched_Color_Picker", str.RESEARCHED_LABEL, str.RESEARCHED_TOOLTIP,
-					function()
-						local r, g, b, a = HexToRGBA(settings.alreadyResearchedColor)
-						return r, g, b
-					end,
-					function(r, g, b)
-						settings.alreadyResearchedColor = RGBAToHex(r, g, b, 1)
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddColorPicker(panel, "RA_Ornate_Color_Picker", str.ORNATE_LABEL, str.ORNATE_TOOLTIP,
-					function()
-						local r, g, b, a = HexToRGBA(settings.ornateColor)
-						return r, g, b
-					end,
-					function(r, g, b)
-						settings.ornateColor = RGBAToHex(r, g, b, 1)
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddColorPicker(panel, "RA_Intricate_Color_Picker", str.INTRICATE_LABEL, str.INTRICATE_TOOLTIP,
-					function()
-						local r, g, b, a = HexToRGBA(settings.intricateColor)
-						return r, g, b
-					end,
-					function(r, g, b)
-						settings.intricateColor = RGBAToHex(r, g, b, 1)
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddHeader(panel, "RA_Character_Tracking_Header", "Character-Specific Tracking Options")
-	LAM:AddCheckbox(panel, "RA_Is_Blacksmith", str.BLACKSMITH_LABEL, str.BLACKSMITH_TOOLTIP,
-					function() return settings.isBlacksmith[GetUnitName("player")] end,	--getFunc
-					function(value)							--setFunc
-						settings.isBlacksmith[GetUnitName("player")] = value
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddCheckbox(panel, "RA_Is_Clothier", str.CLOTHIER_LABEL, str.CLOTHIER_TOOLTIP,
-					function() return settings.isClothier[GetUnitName("player")] end,	--getFunc
-					function(value)							--setFunc
-						settings.isClothier[GetUnitName("player")] = value
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddCheckbox(panel, "RA_Is_Woodworking", str.WOODWORKING_LABEL, str.WOODWORKING_TOOLTIP,
-					function() return settings.isWoodworking[GetUnitName("player")] end,	--getFunc
-					function(value)							--setFunc
-						settings.isWoodworking[GetUnitName("player")] = value
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddHeader(panel, "RA_Misc_Tracking_Header", "Miscellaneous Tracking Options")
-	LAM:AddCheckbox(panel, "RA_Show_Researched", str.SHOW_RESEARCHED_LABEL, str.SHOW_RESEARCHED_TOOLTIP,
-					function() return settings.showResearched end,	--getFunc
-					function(value)							--setFunc
-						settings.showResearched = value
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddCheckbox(panel, "RA_Show_Traitless", str.SHOW_TRAITLESS_LABEL, str.SHOW_TRAITLESS_TOOLTIP,
-					function() return settings.showTraitless end,	--getFunc
-					function(value)							--setFunc
-						settings.showTraitless = value
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddCheckbox(panel, "RA_Show_Untracked_Ornate", str.SHOW_ORNATE_LABEL, str.SHOW_ORNATE_TOOLTIP,
-					function() return settings.showUntrackedOrnate end,	--getFunc
-					function(value)							--setFunc
-						settings.showUntrackedOrnate = value
-						ResearchAssistant_InvUpdate()
-					end)
-
-	LAM:AddCheckbox(panel, "RA_Show_Untracked_Intricate", str.SHOW_INTRICATE_LABEL, str.SHOW_INTRICATE_TOOLTIP,
-					function() return settings.showUntrackedIntricate end,	--getFunc
-					function(value)							--setFunc
-						settings.showUntrackedIntricate = value
-						ResearchAssistant_InvUpdate()
-					end)
 
 	local knownCharacters = { "off" }
 	for k,_ in pairs(settings.useCrossCharacter) do
 		table.insert(knownCharacters, k)
 	end
 
-	LAM:AddHeader(panel, "RA_Cross_Char_Tracking_Header", "Cross-Character Tracking Options")
-	LAM:AddCheckbox(panel, "RA_Track_Cross_Character", str.CROSS_CHAR_LABEL, str.CROSS_CHAR_TOOLTIP,
-					function() return settings.useCrossCharacter[GetUnitName("player")] end,	--getFunc
-					function(value)							--setFunc
+	local optionsData = {
+		[1] = {
+			type = "header",
+			name = "General Options"
+		},
+
+		[2] = {
+			type = "dropdown",
+			name = str.ICON_LABEL,
+			tooltip = str.ICON_TOOLTIP,
+			choices = TEXTURE_OPTIONS,
+			getFunc = function() return settings.textureName end,
+			setFunc = function(value)
+						settings.textureName = value
+						icon:SetTexture(CAN_RESEARCH_TEXTURES[value].texturePath)
+						icon:SetDimensions(CAN_RESEARCH_TEXTURES[settings.textureName].textureSize, CAN_RESEARCH_TEXTURES[settings.textureName].textureSize)
+						ResearchAssistant_InvUpdate()
+					end,
+			reference = "RA_Icon_Dropdown"
+		},
+
+		[3] = {
+			type = "checkbox",
+			name = str.SHOW_TOOLTIPS_LABEL,
+			tooltip = str.SHOW_TOOLTIPS_TOOLTIP,
+			getFunc = function() return settings.showTooltips end,
+			setFunc = function(value)
+						settings.showTooltips = value
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[4] = {
+			type = "checkbox",
+			name = str.SHOW_IN_GRID_LABEL,
+			tooltip = str.SHOW_IN_GRID_TOOLTIP,
+			getFunc = function() return settings.showInGrid end,
+			setFunc = function(value)
+						settings.showInGrid = value
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[5] = {
+			type = "header",
+			name = "Color options"
+		},
+
+		[6] = {
+			type = "colorpicker",
+			name = str.RESEARCHABLE_LABEL,
+			tooltip = str.RESEARCHABLE_TOOLTIP,
+			getFunc = function()
+						local r, g, b, a = HexToRGBA(settings.canResearchColor)
+						return r, g, b
+					end,
+			setFunc = function(r, g, b)
+						settings.canResearchColor = RGBAToHex(r, g, b, 1)
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[7] = {
+			type = "colorpicker",
+			name = str.DUPLICATE_LABEL,
+			tooltip = str.DUPLICATE_TOOLTIP,
+			getFunc = function()
+						local r, g, b, a = HexToRGBA(settings.duplicateUnresearchedColor)
+						return r, g, b
+					end,
+			setFunc = function(r, g, b)
+						settings.duplicateUnresearchedColor = RGBAToHex(r, g, b, 1)
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[8] = {
+			type = "colorpicker",
+			name = str.RESEARCHED_LABEL,
+			tooltip = str.RESEARCHED_TOOLTIP,
+			getFunc = function()
+						local r, g, b, a = HexToRGBA(settings.alreadyResearchedColor)
+						return r, g, b
+					end,
+			setFunc = function(r, g, b)
+						settings.alreadyResearchedColor = RGBAToHex(r, g, b, 1)
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[9] = {
+			type = "colorpicker",
+			name = str.ORNATE_LABEL,
+			tooltip = str.ORNATE_TOOLTIP,
+			getFunc = function()
+						local r, g, b, a = HexToRGBA(settings.ornateColor)
+						return r, g, b
+					end,
+			setFunc = function(r, g, b)
+						settings.ornateColor = RGBAToHex(r, g, b, 1)
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[10] = {
+			type = "colorpicker",
+			name = str.INTRICATE_LABEL,
+			tooltip = str.INTRICATE_TOOLTIP,
+			getFunc = function()
+						local r, g, b, a = HexToRGBA(settings.intricateColor)
+						return r, g, b
+					end,
+			setFunc = function(r, g, b)
+						settings.intricateColor = RGBAToHex(r, g, b, 1)
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[11] = {
+			type = "header",
+			name = "Character-Specific Tracking Options"
+		},
+
+		[12] = {
+			type = "checkbox",
+			name = str.BLACKSMITH_LABEL,
+			tooltip = str.BLACKSMITH_TOOLTIP,
+			getFunc = function() return settings.isBlacksmith[GetUnitName("player")] end,
+			setFunc = function(value)
+						settings.isBlacksmith[GetUnitName("player")] = value
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[13] = {
+			type = "checkbox",
+			name = str.CLOTHIER_LABEL,
+			tooltip = str.CLOTHIER_TOOLTIP,
+			getFunc = function() return settings.isClothier[GetUnitName("player")] end,
+			setFunc = function(value)
+						settings.isClothier[GetUnitName("player")] = value
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[14] = {
+			type = "checkbox",
+			name = str.WOODWORKING_LABEL,
+			tooltip = str.WOODWORKING_TOOLTIP,
+			getFunc = function() return settings.isWoodworking[GetUnitName("player")] end,
+			setFunc = function(value)
+						settings.isWoodworking[GetUnitName("player")] = value
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[15] = {
+			type = "header",
+			name = "Miscellaneous Tracking Options"
+		},
+
+		[16] = {
+			type = "checkbox",
+			name = str.SHOW_RESEARCHED_LABEL,
+			tooltip = str.SHOW_RESEARCHED_TOOLTIP,
+			getFunc = function() return settings.showResearched end,
+			setFunc = function(value)
+						settings.showResearched = value
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[17] = {
+			type = "checkbox",
+			name = str.SHOW_TRAITLESS_LABEL,
+			tooltip = str.SHOW_TRAITLESS_TOOLTIP,
+			getFunc = function() return settings.showTraitless end,
+			setFunc = function(value)
+						settings.showTraitless = value
+						ResearchAssistant_InvUpdate()
+					end,
+			disabled = function() return not settings.showResearched end
+		},
+
+		[18] = {
+			type = "checkbox",
+			name = str.SHOW_ORNATE_LABEL,
+			tooltip = str.SHOW_ORNATE_TOOLTIP,
+			getFunc = function() return settings.showUntrackedOrnate end,
+			setFunc = function(value)
+						settings.showUntrackedOrnate = value
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[19] = {
+			type = "checkbox",
+			name = str.SHOW_INTRICATE_LABEL,
+			tooltip = str.SHOW_INTRICATE_TOOLTIP,
+			getFunc = function() return settings.showUntrackedIntricate end,
+			setFunc = function(value)
+						settings.showUntrackedIntricate = value
+						ResearchAssistant_InvUpdate()
+					end
+		},
+
+		[20] = {
+			type = "header",
+			name = "Cross-Character Tracking Options"
+		},
+
+		[21] = {
+			type = "checkbox",
+			name = str.CROSS_CHAR_LABEL,
+			tooltip = str.CROSS_CHAR_TOOLTIP,
+			getFunc = function() return settings.useCrossCharacter[GetUnitName("player")] end,
+			setFunc = function(value)
 						settings.useCrossCharacter[GetUnitName("player")] = value
 						ResearchAssistant_InvUpdate()
-					end)
+					end
+		},
 
-	LAM:AddDropdown(panel, "RA_Blacksmith_Char_Dropdown", str.BS_CHAR_LABEL, str.BS_CHAR_TOOLTIP, 
-					knownCharacters,
-					function() return settings.blacksmithCharacter[GetUnitName("player")] end,	--getFunc
-					function(value)							--setFunc
+		[22] = {
+			type = "dropdown",
+			name = str.BS_CHAR_LABEL,
+			tooltip = str.BS_CHAR_TOOLTIP,
+			choices = knownCharacters,
+			getFunc = function() return settings.blacksmithCharacter[GetUnitName("player")] end,
+			setFunc = function(value)
 						settings.blacksmithCharacter[GetUnitName("player")] = value
 						ResearchAssistant_InvUpdate()
-					end)
+					end,
+			disabled = function() return not settings.useCrossCharacter[GetUnitName("player")] end
+		},
 
-	LAM:AddDropdown(panel, "RA_Clothier_Char_Dropdown", str.CL_CHAR_LABEL, str.CL_CHAR_TOOLTIP, 
-					knownCharacters,
-					function() return settings.clothierCharacter[GetUnitName("player")] end,	--getFunc
-					function(value)							--setFunc
+		[23] = {
+			type = "dropdown",
+			name = str.CL_CHAR_LABEL,
+			tooltip = str.CL_CHAR_TOOLTIP,
+			choices = knownCharacters,
+			getFunc = function() return settings.clothierCharacter[GetUnitName("player")] end,
+			setFunc = function(value)
 						settings.clothierCharacter[GetUnitName("player")] = value
 						ResearchAssistant_InvUpdate()
-					end)
+					end,
+			disabled = function() return not settings.useCrossCharacter[GetUnitName("player")] end
+		},
 
-	LAM:AddDropdown(panel, "RA_Woodworking_Char_Dropdown", str.WW_CHAR_LABEL, str.WW_CHAR_TOOLTIP, 
-					knownCharacters,
-					function() return settings.woodworkingCharacter[GetUnitName("player")] end,	--getFunc
-					function(value)							--setFunc
+		[24] = {
+			type = "dropdown",
+			name = str.WW_CHAR_LABEL,
+			tooltip = str.WW_CHAR_TOOLTIP,
+			choices = knownCharacters,
+			getFunc = function() return settings.woodworkingCharacter[GetUnitName("player")] end,
+			setFunc = function(value)
 						settings.woodworkingCharacter[GetUnitName("player")] = value
 						ResearchAssistant_InvUpdate()
-					end)
+					end,
+			disabled = function() return not settings.useCrossCharacter[GetUnitName("player")] end
+		}
+	}
+
+	LAM:RegisterAddonPanel("ResearchAssistantSettingsPanel", panel)
+	LAM:RegisterOptionControls("ResearchAssistantSettingsPanel", optionsData)
+
+	CALLBACK_MANAGER:RegisterCallback("LAM-PanelControlsCreated",
+		function()
+			icon:SetParent(RA_Icon_Dropdown)
+			icon:SetTexture(CAN_RESEARCH_TEXTURES[settings.textureName].texturePath)
+			icon:SetDimensions(CAN_RESEARCH_TEXTURES[settings.textureName].textureSize, CAN_RESEARCH_TEXTURES[settings.textureName].textureSize)
+			icon:SetAnchor(CENTER, RA_Icon_Dropdown, CENTER, 36, 0)
+		end)
 end
 
 function ResearchAssistantSettings:GetLanguage()

@@ -1,6 +1,6 @@
 
 ResearchAssistantScanner = ZO_Object:Subclass()
-libResearch = LibStub("libResearch")
+local libResearch = LibStub("libResearch")
 
 local BLACKSMITH = CRAFTING_TYPE_BLACKSMITHING
 local CLOTHIER = CRAFTING_TYPE_CLOTHIER
